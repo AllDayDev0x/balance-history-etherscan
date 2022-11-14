@@ -21,6 +21,10 @@ const BalanceHistory = () => {
     const [totalEthBalance, setTotalEthBalance] = useState(0);
     const [totalUSDBalance, setTotalUSDBalance] = useState(0);
     const [WsState, setWsState] = useState(false);
+    const [dailyPNL, setDailyPnl] = useState(0);
+    const [monthlyPNL, setMonthlyPnl] = useState(0);
+    const [yearlyPNL, setYearlyPnl] = useState(0);
+    const [tokenBalance, setTokenBalance] = useState({usdt:0, usdc:0, dai:0});
     useEffect(() => {
         let wss = new WebSocket(`ws://${window.location.host}`);
         setWS(wss);
@@ -42,6 +46,10 @@ const BalanceHistory = () => {
                 setTotalEthBalance(res.data.TotalEthBalance);
                 setTotalUSDBalance(res.data.TotalUSDBalance);
                 setPnLItem(res.PNLItem);
+                setDailyPnl(res.data.dailyPNL);
+                setMonthlyPnl(res.data.monthlyPNL);
+                setYearlyPnl(res.data.yearlyPNL);
+                setTokenBalance(res.data.tokenBalance)
             }
         }
         wss.onopen = (e) => {
@@ -67,7 +75,7 @@ const BalanceHistory = () => {
         if (PnLitem == "D" && Ws && month && WsState)
             Ws.send(JSON.stringify({ Year: year, Month: month.split("-")[1] * 1, PNLItem: PnLitem }));
 
-    }, [month,WsState]);
+    }, [month, WsState]);
     useEffect(() => {
         setConfig({
             data: [...dataForChartDaily],
@@ -93,6 +101,11 @@ const BalanceHistory = () => {
                         </div>)
                     }
                 }
+            },
+            color:({date})=>{
+                return dataForChartDaily.filter((item)=>{
+                    return item.date == date
+                })[0].EPnl*1 >=0 ?"#10a4e9":"#e93b10";
             }
 
         })
@@ -124,6 +137,52 @@ const BalanceHistory = () => {
 
                     <input type="month" className=" form-control" value={month} onChange={onChangeDate} />
                 </div>
+
+            </div>
+            <div className="d-flex justify-content-center pl-5">
+                <div className="col">
+                    Daily:
+                    <span className="bg-dark1 border border-dark rounded p-2 ml-3 " style={{ boxShadow: "0px 0px 5px rgba(1,1,1,0.5)" }}>
+                        {dailyPNL >= 0 ? <span className="text-success">{dailyPNL} ETH</span>:<span className="text-danger">{dailyPNL} ETH</span>}
+                    </span>
+
+                </div>
+                <div className="col">
+                    Monthly:
+                    <span className="bg-dark1 border border-dark rounded p-2 ml-3 " style={{ boxShadow: "0px 0px 5px rgba(1,1,1,0.5)" }}>
+                    {monthlyPNL >= 0 ? <span className="text-success">{monthlyPNL} ETH</span>:<span className="text-danger">{monthlyPNL} ETH</span>}
+                    </span>
+
+                </div>
+                <div className="col">
+                    yearly:
+                    <span className="bg-dark1 border border-dark rounded p-2 ml-3 " style={{ boxShadow: "0px 0px 5px rgba(1,1,1,0.5)" }}>
+                    {yearlyPNL >= 0 ? <span className="text-success">{yearlyPNL} ETH</span>:<span className="text-danger">{yearlyPNL} ETH</span>}
+                    </span>
+
+                </div>
+                <div className="col">
+                    USDT:
+                    <span className="bg-dark1 border border-dark rounded p-2 ml-3 " style={{ boxShadow: "0px 0px 5px rgba(1,1,1,0.5)" }}>
+                       {tokenBalance.usdt}
+                    </span>
+
+                </div>
+                <div className="col">
+                    USDC:
+                    <span className="bg-dark1 border border-dark rounded p-2 ml-3 " style={{ boxShadow: "0px 0px 5px rgba(1,1,1,0.5)" }}>
+                       {tokenBalance.usdc}
+                    </span>
+
+                </div>
+                <div className="col">
+                    DAI:
+                    <span className="bg-dark1 border border-dark rounded p-2 ml-3 " style={{ boxShadow: "0px 0px 5px rgba(1,1,1,0.5)" }}>
+                        {tokenBalance.dai}
+                    </span>
+
+                </div>
+
 
             </div>
 
